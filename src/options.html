@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="de">
+<meta charset="utf-8" />
+<title>jobklick.it</title>
+<!-- Self-contained: the popup's look lives in popup.css, nothing is loaded from the backend. -->
+<link rel="stylesheet" href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600,700&display=swap" />
+<link rel="stylesheet" href="popup.css" />
+<body>
+<main id="view-main">
+  <header class="top">
+    <span class="logo-tile"><img src="icon-128.png" width="40" height="40" alt="" /></span>
+    <div class="who">
+      <strong>jobklick</strong>
+      <span class="conn" id="conn-row" hidden><span class="dot" aria-hidden="true"></span><output id="conn-status" aria-live="polite"></output></span>
+    </div>
+    <button type="button" id="diagnostics-toggle" class="icon-btn" aria-controls="diagnostics" aria-expanded="false" aria-label="Diagnose" title="Diagnose">
+      <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+    </button>
+    <button type="button" id="conn-edit-toggle" class="icon-btn" aria-controls="conn-edit" aria-expanded="false" aria-label="Verbindung bearbeiten" title="Verbindung bearbeiten">
+      <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M21.17 6.81a1 1 0 0 0-3.98-3.98L3.84 16.17a2 2 0 0 0-.5.83l-1.32 4.35a.5.5 0 0 0 .62.62l4.35-1.32a2 2 0 0 0 .83-.5z"/><path d="m15 5 4 4"/></svg>
+    </button>
+  </header>
+
+  <section id="diagnostics" class="card" hidden aria-label="Diagnose">
+    <div class="card-head"><span class="label">Diagnose</span><span class="muted">nur lokal</span></div>
+    <p class="muted">Letzte 200 Ereignisse, max. 7 Tage.</p>
+    <div class="split">
+      <button type="button" id="refresh-logs" class="btn">Neu laden</button>
+      <button type="button" id="copy-logs" class="btn">Kopieren</button>
+      <button type="button" id="clear-logs" class="btn">Löschen</button>
+    </div>
+    <textarea id="log-output" rows="7" readonly aria-label="Diagnoseprotokoll"></textarea>
+    <output id="log-status" class="muted" aria-live="polite"></output>
+  </section>
+
+  <section id="conn-edit" class="card" hidden>
+    <div class="card-head"><span class="label">Verbindung</span></div>
+    <button id="connect" type="button" class="btn btn-primary">Mit jobklick.it verbinden</button>
+    <form id="f">
+      <label class="field">
+        <span>Backend-URL</span>
+        <input id="backend" type="url" required placeholder="https://app.jobklick.it" />
+      </label>
+      <label class="field">
+        <span>API-Token</span>
+        <input id="token" required autocomplete="off" />
+      </label>
+      <p class="muted"><a id="token-link" href="https://app.jobklick.it/settings#extension" target="_blank" rel="noopener">Token von Hand erstellen</a> · <a id="settings-link" href="https://app.jobklick.it/settings" target="_blank" rel="noopener">Einstellungen</a></p>
+      <button class="btn">Speichern und testen</button>
+    </form>
+  </section>
+  <output id="out" class="muted" aria-live="polite"></output>
+
+  <section id="page-card" class="card" hidden>
+    <span class="label accent" id="page-label"></span>
+    <div>
+      <h2 id="page-title"></h2>
+      <p class="muted" id="page-meta"></p>
+    </div>
+    <button type="button" id="page-save" class="btn btn-primary">
+      <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 21l-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+      <span>Job speichern</span>
+    </button>
+    <button type="button" id="page-fill" class="btn">
+      <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4M12 16h4M8 11h.01M8 16h.01"/></svg>
+      <span>Bewerbungsformular ausfüllen</span>
+    </button>
+    <output id="page-out" class="muted" aria-live="polite"></output>
+  </section>
+
+  <nav class="menu">
+    <div id="scan-actions" hidden>
+      <button type="button" id="scan-page" class="menu-row">
+        <span class="menu-icon"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg></span>
+        <span class="menu-text"><b>Stellen auf dieser Seite finden</b><output id="scan-status" aria-live="polite">Passende Stellen markieren</output></span>
+      </button>
+    </div>
+    <div id="page-actions" hidden>
+      <button type="button" id="activate-listings" class="menu-row" disabled>
+        <span class="menu-icon"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2 3 14h9l-1 8 10-12h-9z"/></svg></span>
+        <span class="menu-text"><b>Buttons auf dieser Seite aktivieren</b><output id="page-status" aria-live="polite">Falls die Stellen-Buttons fehlen</output></span>
+      </button>
+    </div>
+    <button type="button" id="open-filters" class="menu-row">
+      <span class="menu-icon"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M22 3H2l8 9.46V19l4 2v-8.54z"/></svg></span>
+      <span class="menu-text"><b>Ausschlussfilter</b><span id="filters-summary">Begriffe im Titel ausschließen</span></span>
+      <svg class="i chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+    </button>
+    <a id="app-link" class="menu-row" href="https://app.jobklick.it" target="_blank" rel="noopener">
+      <span class="menu-icon"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg></span>
+      <span class="menu-text"><b>Bewerbungen öffnen</b><span id="app-host">app.jobklick.it</span></span>
+      <svg class="i chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7h10v10M7 17 17 7"/></svg>
+    </a>
+  </nav>
+
+  <p class="tip">Tipp: Rechtsklick funktioniert auf jeder Jobseite.</p>
+</main>
+
+<main id="view-filters" hidden>
+  <header class="top">
+    <button type="button" id="close-filters" class="icon-btn" aria-label="Zurück" title="Zurück">
+      <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 19-7-7 7-7M19 12H5"/></svg>
+    </button>
+    <h1>Ausschlussfilter</h1>
+    <span class="muted" id="filters-count"></span>
+  </header>
+  <form id="filters-form">
+    <span class="label">Aktiv</span>
+    <div class="chips" id="keyword-chips"></div>
+    <input id="keyword-input" class="chip-input" placeholder="Begriff + Enter" aria-label="Ausschlussbegriff hinzufügen" autocomplete="off" />
+
+    <section class="card">
+      <div class="card-head">
+        <span class="ai-title"><svg class="i accent" viewBox="0 0 24 24" aria-hidden="true"><path d="M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z"/></svg> KI-Vorschläge</span>
+        <button type="button" id="accept-all" class="link accent" hidden>Alle übernehmen</button>
+      </div>
+      <p class="muted">Passend zu deinem Profil und deinen gespeicherten Stellen.</p>
+      <div class="chips" id="keyword-suggestions"></div>
+      <button type="button" id="suggest-keywords" class="btn" disabled title="Nutzt deinen KI-Zugang">Vorschläge laden</button>
+    </section>
+
+    <span class="label">Treffer</span>
+    <div class="segmented" role="radiogroup" aria-label="Ausgeschlossene Stellen">
+      <label><input type="radio" name="filter-mode" value="mute" /><span>Ausgrauen</span></label>
+      <label><input type="radio" name="filter-mode" value="hide" /><span>Ausblenden</span></label>
+      <label><input type="radio" name="filter-mode" value="show" /><span>Nur markieren</span></label>
+    </div>
+
+    <output id="filters-status" class="muted" aria-live="polite"></output>
+    <button id="save-filters" class="btn btn-primary btn-lg" disabled>Speichern</button>
+  </form>
+</main>
+<script src="logging.js"></script>
+<script src="options.js"></script>
+<script src="preferences.js"></script>
+<script src="activation.js"></script>
+<script src="scanning.js"></script>
+<script src="diagnostics.js"></script>
+</body>
+</html>

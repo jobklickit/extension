@@ -1,0 +1,4 @@
+dist/
+safari-project/
+__pycache__/
+.DS_Store

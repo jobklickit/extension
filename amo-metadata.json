@@ -1,0 +1,13 @@
+{
+  "summary": {
+    "en-US": "Right-click a job listing to save it to jobklick.it.",
+    "de-DE": "Speichere mit Rechtsklick ein Jobangebot auf jobklick.it"
+  },
+  "categories": [
+    "other"
+  ],
+  "version": {
+    "license": "MIT"
+  },
+  "requires_payment": false
+}

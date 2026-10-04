@@ -1,0 +1,34 @@
+{
+  "manifest_version": 3,
+  "name": "jobklick.it",
+  "version": "0.3.5",
+  "description": "Right-click → Save job.",
+  "permissions": ["contextMenus", "activeTab", "scripting", "storage"],
+  "optional_host_permissions": ["http://*/*", "https://*/*"],
+  "host_permissions": [
+    "https://*.stepstone.de/*", "https://*.stepstone.at/*", "https://*.stepstone.be/*",
+    "https://*.indeed.com/*", "https://*.indeed.de/*", "https://*.indeed.co.uk/*",
+    "https://*.indeed.fr/*", "https://*.indeed.at/*", "https://*.indeed.ch/*",
+    "https://*.linkedin.com/*"
+  ],
+  "content_scripts": [{
+    "matches": [
+      "https://*.stepstone.de/*", "https://*.stepstone.at/*", "https://*.stepstone.be/*",
+      "https://*.indeed.com/*", "https://*.indeed.de/*", "https://*.indeed.co.uk/*",
+      "https://*.indeed.fr/*", "https://*.indeed.at/*", "https://*.indeed.ch/*",
+      "https://*.linkedin.com/*"
+    ],
+    "js": ["logging.js", "listings.js"],
+    "run_at": "document_idle"
+  }],
+  "background": { "service_worker": "background.js", "scripts": ["logging.js", "background.js"] },
+  "icons": { "16": "icon-16.png", "32": "icon-32.png", "48": "icon-48.png", "128": "icon-128.png" },
+  "action": { "default_title": "jobklick.it", "default_popup": "options.html", "default_icon": { "16": "icon-16.png", "32": "icon-32.png", "48": "icon-48.png", "128": "icon-128.png" } },
+  "options_ui": { "page": "options.html" },
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "extension@jobklick.it",
+      "data_collection_permissions": { "required": ["websiteContent"] }
+    }
+  }
+}
